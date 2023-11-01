@@ -32,7 +32,7 @@ onMounted(() => {
 
     function init() {
 
-        camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xf0f0f0);
@@ -40,8 +40,8 @@ onMounted(() => {
         //region LIGHTs
         const light = new THREE.HemisphereLight(0xffffbb, 0xffffbb, 1);
         scene.add(light);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 3000);
+        //
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
         dirLight.position.set(0, 10, 0).normalize();
         scene.add(dirLight);
         //endregion
@@ -59,24 +59,6 @@ onMounted(() => {
             // called when the resource is loaded
             function (gltf) {
 
-                // gltf.scene.traverse(function (child) {
-                //     console.log(child)
-                //     // if ((<THREE.Mesh>child).isMesh) {
-                //     //     const m = child as THREE.Mesh
-                //     //     m.receiveShadow = true
-                //     //     m.castShadow = true
-                //     //     // ;(m.material as THREE.MeshStandardMaterial).flatShading = true
-                //     //     // sceneMeshes.push(m)
-                //     // }
-                //     // if ((child as THREE.Light).isLight) {
-                //     //     const l = child as THREE.SpotLight
-                //     //     l.castShadow = true
-                //     //     l.shadow.bias = -0.003
-                //     //     l.shadow.mapSize.width = 2048
-                //     //     l.shadow.mapSize.height = 2048
-                //     // }
-                // })
-
                 scene.add(gltf.scene);
 
                 // gltf.animations; // Array<THREE.AnimationClip>
@@ -84,8 +66,6 @@ onMounted(() => {
                 model3d = gltf.scenes; // Array<THREE.Group>
                 // gltf.cameras; // Array<THREE.Camera>
                 gltf.asset; // Object
-                // model3d.raycast = acceleratedRaycast;
-                // model3d.boundsTree = new MeshBVH( model3d );
             },
             // called while loading is progressing
             function (xhr) {
@@ -111,7 +91,7 @@ onMounted(() => {
         sceneBlock.appendChild(renderer.domElement);
 
         controls = new OrbitControls(camera, renderer.domElement);
-        camera.position.set(0, 43, 10);
+        camera.position.set(0, 100, 20);
         controls.update();
 
         stats = new Stats();
@@ -154,52 +134,37 @@ onMounted(() => {
         pointer.y = -((event.clientY - sceneRect.top) / sceneRect.height) * 2 + 1;
 
         raycaster.setFromCamera(pointer, camera);
-        //
+
         const intersects = raycaster.intersectObjects(model3d);
         if (intersects.length > 0) {
 
             objSelected.value = 'Выбран:' + intersects[0].object.name
-            // console.log("Intersected object", intersects[0].object);
-
-            // for( let i = 0; i < intersects.length; i++ ) {
-            //     let intersection = intersects[ i ],
-            //         obj = intersection.object;
-            //     console.log("Intersected object", obj);
-            // }
-            // console.log('click')
         }
     }
 
     function render() {
 
         if (typeof model3d == "undefined") return
-        // // find intersections
-        //
+
         raycaster.setFromCamera(pointer, camera);
-        //
+
         const intersects = raycaster.intersectObjects(model3d);
-        //
-        // console.log(model3d)
-        //
-        if (intersects.length > 0) {
-            // for (let i = 0; i < intersects.length; i++) {
-            //     console.log(intersects[i]);
-            // }
-            // console.log('---------------------------------')
+
+        if (intersects?.length > 0) {
 
             if (INTERSECTED != intersects[0].object) {
 
-                if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+                if (INTERSECTED) INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
 
                 INTERSECTED = intersects[0].object;
-                INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-                INTERSECTED.material.emissive.setHex(0xff0000);
+                INTERSECTED.currentHex = INTERSECTED.material.color.getHex();
+                INTERSECTED.material.color.setHex(0xff0000);
 
             }
 
         } else {
 
-            if (INTERSECTED) INTERSECTED.material.emissive.setHex(INTERSECTED.currentHex);
+            if (INTERSECTED) INTERSECTED.material.color.setHex(INTERSECTED.currentHex);
 
             INTERSECTED = null;
 
